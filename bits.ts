@@ -39,13 +39,16 @@ export class Bit {
   static max(bits: number) {
     return (1 << (bits - 1)) - 1;
   }
-  static shl(bits: Bits) {
+  static shl(bits: Bits, offset: number) {
+    if (offset == 0) return bits;
     const shifted = [...bits.bits.slice(1), 0]
-    return new Bits(shifted.join(""), bits.length)
+    return this.shl(new Bits(shifted.join(""), bits.length), offset - 1);
   }
-  static shr(bits: Bits) {
+  
+  static shr(bits: Bits, offset: number) {
+    if (offset == 0) return bits
     const shifted = [0, ...bits.bits.slice(0, bits.length - 1)]
-    return new Bits(shifted.join(""), bits.length)
+    return this.shr(new Bits(shifted.join(""), bits.length), offset - 1);
   }
 
   // Logic

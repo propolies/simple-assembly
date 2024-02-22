@@ -7,7 +7,7 @@ const byteSize = 5
 function logger(op: string, reg: string, old: Bits | string, value: Bits | string, sym = "=") {
   function calcSpace(v: string | number | Bits, space: number) {
     if (typeof v == "number") v = v.toString()
-    return " ".repeat(space - v.length) + v
+    return " ".repeat(Math.abs(space - v.length)) + v
   }
   console.log(
     chalk.blue(calcSpace(op, 3)),
@@ -19,6 +19,9 @@ function logger(op: string, reg: string, old: Bits | string, value: Bits | strin
 }
 
 const registers: { [key: string]: Bits } = {
+  "R5": new Bits("10001", byteSize),
+  "R6": new Bits("01110", byteSize),
+  "R7": new Bits(5, byteSize),
 }
 
 // Helper
@@ -33,14 +36,14 @@ function MOV([r1, r2]: string[]) {
   const computed = registers[r1] = v2
   logger("MOV", r1, v1, computed)
 }
-function SHL([r1]: string[]) {
+function SHL([r1, off]: string[]) {
   const v1 = registers[r1]
-  const computed = registers[r1] = Bit.shl(v1)
+  const computed = registers[r1] = Bit.shl(v1, Number.parseInt(off))
   logger("SHL", r1, v1, computed)
 }
-function SHR([r1]: string[]) {
+function SHR([r1, off]: string[]) {
   const v1 = registers[r1]
-  const computed = registers[r1] = Bit.shr(v1)
+  const computed = registers[r1] = Bit.shr(v1, Number.parseInt(off))
   logger("SHL", r1, v1, computed)
 }
 function DEF([r1, v]: string[]) {
@@ -60,25 +63,25 @@ function NOT([r1]: string[]) {
   const computed = registers[r1] = Bit.not(v1)
   logger("NOT", r1, v1, computed)
 }
-function AND([r1, r2]: string[]) {
+function AND([rd, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[r1] = Bit.and(v1, v2)
-  logger("AND", r1, v1, "", "&")
+  const computed = registers[rd] = Bit.and(v1, v2)
+  logger("AND", rd, v1, "", "&")
   logger("", "", v2, computed, "=")
 }
-function OR([r1, r2]: string[]) {
+function OR([rd, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[r1] = Bit.or(v1, v2)
-  logger("OR ", r1, v1, "", "|")
+  const computed = registers[rd] = Bit.or(v1, v2)
+  logger("OR ", rd, v1, "", "|")
   logger("", "", v2, computed, "=")
 }
-function XOR([r1, r2]: string[]) {
+function XOR([rd, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[r1] = Bit.xor(v1, v2)
-  logger("XOR", r1, v1, "", "^")
+  const computed = registers[rd] = Bit.xor(v1, v2)
+  logger("XOR", rd, v1, "", "^")
   logger("", "", v2, computed, "=")
 }
 
@@ -88,18 +91,18 @@ function INC([r1]: string[]) {
   const computed = registers[r1] = Bit.inc(v1)
   logger("INC", r1, v1, computed)
 }
-function ADD([r1, r2]: string[]) {
+function ADD([rd, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[r1] = Bit.add(v1, v2)
-  logger("ADD", r1, v1, "", "+")
+  const computed = registers[rd] = Bit.add(v1, v2)
+  logger("ADD", rd, v1, "", "+")
   logger("", "", v2, computed, "=")
 }
-function SUB([r1, r2]: string[]) {
+function SUB([rd, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[r1] = Bit.sub(v1, v2)
-  logger("SUB", r1, v1, "", "-")
+  const computed = registers[rd] = Bit.sub(v1, v2)
+  logger("SUB", rd, v1, "", "-")
   logger("", "", v2, computed, "=")
 }
 function DEC([r1]: string[]) {
