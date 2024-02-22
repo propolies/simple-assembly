@@ -39,6 +39,14 @@ export class Bit {
   static max(bits: number) {
     return (1 << (bits - 1)) - 1;
   }
+  static shl(bits: Bits) {
+    const shifted = [...bits.bits.slice(1), 0]
+    return new Bits(shifted.join(""), bits.length)
+  }
+  static shr(bits: Bits) {
+    const shifted = [0, ...bits.bits.slice(0, bits.length - 1)]
+    return new Bits(shifted.join(""), bits.length)
+  }
 
   // Logic
   static not(bits: Bits) {
