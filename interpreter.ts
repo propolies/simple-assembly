@@ -19,9 +19,6 @@ function logger(op: string, reg: string, old: Bits | string, value: Bits | strin
 }
 
 const registers: { [key: string]: Bits } = {
-  "R5": new Bits("10001", byteSize),
-  "R6": new Bits("01110", byteSize),
-  "R7": new Bits(5, byteSize),
 }
 
 // Helper
@@ -45,6 +42,10 @@ function SHR([r1]: string[]) {
   const v1 = registers[r1]
   const computed = registers[r1] = Bit.shr(v1)
   logger("SHL", r1, v1, computed)
+}
+function DEF([r1, v]: string[]) {
+  const computed = registers[r1] = new Bits(v, byteSize)
+  logger("DEF", r1, "", computed)
 }
 function CUR(_: string[]) {
   console.log(chalk.blue("CUR"))
@@ -113,6 +114,7 @@ fs.readFile("main.txt", (_, txt) => {
       case "SHL": SHL(regs); break
       case "SHR": SHR(regs); break
       case "CUR": CUR(regs); break
+      case "DEF": DEF(regs); break
 
       // Logic
       case "NOT": NOT(regs); break
