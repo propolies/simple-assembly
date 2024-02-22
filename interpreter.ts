@@ -1,54 +1,42 @@
 import fs from 'fs'
 import chalk from 'chalk'
 import { Bits, Bit } from './bits'
+import { initLogger } from './logger'
+import rand from 'random'
 
 const byteSize = 5
-
-function logger(op: string, reg: string, old: Bits | string, value: Bits | string, sym = "=") {
-  function calcSpace(v: string | number | Bits, space: number) {
-    if (typeof v == "number") v = v.toString()
-    return " ".repeat(Math.abs(space - v.length)) + v
-  }
-  console.log(
-    chalk.blue(calcSpace(op, 3)),
-    calcSpace(reg, 2),
-    chalk.red(calcSpace(old, byteSize)),
-    calcSpace(sym, 1),
-    chalk.green(calcSpace(value, byteSize))
-  )
-}
+const logger = initLogger(byteSize)
 
 const registers: { [key: string]: Bits } = {
-  "R5": new Bits("10001", byteSize),
-  "R6": new Bits("01110", byteSize),
-  "R7": new Bits(5, byteSize),
+  "R6": new Bits(rand.int(1, Bit.max(byteSize)), byteSize),
+  "R7": new Bits(rand.int(1, Bit.max(byteSize)), byteSize),
 }
 
 // Helper
-function ZER([r1]: string[]) {
-  const v1 = registers[r1]
-  const computed = registers[r1] = new Bits(0, byteSize)
-  logger("ZER", r1, v1, computed)
+function ZER([reg]: string[]) {
+  const prev = registers[reg]
+  const computed = registers[reg] = new Bits(0, byteSize)
+  logger({ op: "ZER", reg, prev, computed })
 }
-function MOV([r1, r2]: string[]) {
+function MOV([reg, r1]: string[]) {
+  const prev = registers[reg]
   const v1 = registers[r1]
-  const v2 = registers[r2]
-  const computed = registers[r1] = v2
-  logger("MOV", r1, v1, computed)
+  const computed = registers[reg] = v1
+  logger({ reg: "MOV", prev, computed })
 }
-function SHL([r1, off]: string[]) {
-  const v1 = registers[r1]
-  const computed = registers[r1] = Bit.shl(v1, Number.parseInt(off))
-  logger("SHL", r1, v1, computed)
+function SHL([reg, offset]: string[]) {
+  const prev = registers[reg]
+  const computed = registers[reg] = Bit.shl(prev, parseInt(offset))
+  logger({ op: "SHL", reg, prev, computed })
 }
-function SHR([r1, off]: string[]) {
-  const v1 = registers[r1]
-  const computed = registers[r1] = Bit.shr(v1, Number.parseInt(off))
-  logger("SHL", r1, v1, computed)
+function SHR([reg, off]: string[]) {
+  const prev = registers[reg]
+  const computed = registers[reg] = Bit.shr(prev, parseInt(off))
+  logger({ op: "SHL", reg, prev, computed})
 }
-function DEF([r1, v]: string[]) {
-  const computed = registers[r1] = new Bits(v, byteSize)
-  logger("DEF", r1, "", computed)
+function DEF([reg, value]: string[]) {
+  const computed = registers[reg] = new Bits(value, byteSize)
+  logger({ op: "DEF", reg, computed})
 }
 function CUR(_: string[]) {
   console.log(chalk.blue("CUR"))
@@ -58,57 +46,57 @@ function CUR(_: string[]) {
 }
 
 // Logic
-function NOT([r1]: string[]) {
-  const v1 = registers[r1]
-  const computed = registers[r1] = Bit.not(v1)
-  logger("NOT", r1, v1, computed)
+function NOT([reg]: string[]) {
+  const prev = registers[reg]
+  const computed = registers[reg] = Bit.not(prev)
+  logger({ op: "NOT", reg, prev, computed })
 }
-function AND([rd, r1, r2]: string[]) {
+function AND([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[rd] = Bit.and(v1, v2)
-  logger("AND", rd, v1, "", "&")
-  logger("", "", v2, computed, "=")
+  const computed = registers[reg] = Bit.and(v1, v2)
+  logger({ op: "AND", reg, prev: v1, sym: "&" })
+  logger({ prev: v2, computed, sym: "=" })
 }
-function OR([rd, r1, r2]: string[]) {
+function OR([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[rd] = Bit.or(v1, v2)
-  logger("OR ", rd, v1, "", "|")
-  logger("", "", v2, computed, "=")
+  const computed = registers[reg] = Bit.or(v1, v2)
+  logger({ op: "OR ", reg, prev: v1, sym: "|" })
+  logger({ prev: v2, computed, sym: "=" })
 }
-function XOR([rd, r1, r2]: string[]) {
+function XOR([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[rd] = Bit.xor(v1, v2)
-  logger("XOR", rd, v1, "", "^")
-  logger("", "", v2, computed, "=")
+  const computed = registers[reg] = Bit.xor(v1, v2)
+  logger({ op: "XOR", reg, prev: v1, sym: "^" })
+  logger({ prev: v2, computed, sym: "=" })
 }
 
 // Math
-function INC([r1]: string[]) {
-  const v1 = registers[r1]
-  const computed = registers[r1] = Bit.inc(v1)
-  logger("INC", r1, v1, computed)
+function INC([reg]: string[]) {
+  const prev = registers[reg]
+  const computed = registers[reg] = Bit.inc(prev)
+  logger({ op: "INC", reg, prev, computed })
 }
-function ADD([rd, r1, r2]: string[]) {
+function ADD([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[rd] = Bit.add(v1, v2)
-  logger("ADD", rd, v1, "", "+")
-  logger("", "", v2, computed, "=")
+  const computed = registers[reg] = Bit.add(v1, v2)
+  logger({ op: "ADD", reg, prev: v1, sym: "+" })
+  logger({ prev: v2, computed, sym: "=" })
 }
-function SUB([rd, r1, r2]: string[]) {
+function SUB([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
-  const computed = registers[rd] = Bit.sub(v1, v2)
-  logger("SUB", rd, v1, "", "-")
-  logger("", "", v2, computed, "=")
+  const computed = registers[reg] = Bit.sub(v1, v2)
+  logger({ op: "SUB", reg, prev: v1, sym: "-" })
+  logger({ prev: v2, computed, sym: "=" })
 }
-function DEC([r1]: string[]) {
-  const v1 = registers[r1]
-  const computed = registers[r1] = Bit.dec(v1)
-  logger("DEC", r1, v1, computed)
+function DEC([reg]: string[]) {
+  const prev = registers[reg]
+  const computed = registers[reg] = Bit.dec(prev)
+  logger({ op: "DEC", reg, prev, computed })
 }
 
 fs.readFile("main.txt", (_, txt) => {
@@ -129,8 +117,8 @@ fs.readFile("main.txt", (_, txt) => {
       // Logic
       case "NOT": NOT(regs); break
       case "AND": AND(regs); break
-      case "OR": OR(regs); break
       case "XOR": XOR(regs); break
+      case "OR ":  OR(regs); break
 
       // Math
       case "ADD": ADD(regs); break
