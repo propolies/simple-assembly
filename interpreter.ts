@@ -74,6 +74,13 @@ function OR([r1, r2]: string[]) {
   logger("OR ", r1, v1, "", "|")
   logger("", "", v2, computed, "=")
 }
+function XOR([r1, r2]: string[]) {
+  const v1 = registers[r1]
+  const v2 = registers[r2]
+  const computed = registers[r1] = Bit.xor(v1, v2)
+  logger("XOR", r1, v1, "", "^")
+  logger("", "", v2, computed, "=")
+}
 
 // Math
 function INC([r1]: string[]) {
@@ -120,6 +127,7 @@ fs.readFile("main.txt", (_, txt) => {
       case "NOT": NOT(regs); break
       case "AND": AND(regs); break
       case "OR": OR(regs); break
+      case "XOR": XOR(regs); break
 
       // Math
       case "ADD": ADD(regs); break
