@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "dev": "nodemon --exec tsx interpreter.ts -e ts,txt"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.3",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,4 @@
+INC R5
+AND R5 R6
+
+CUR
