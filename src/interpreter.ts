@@ -2,14 +2,14 @@ import fs from 'fs'
 import chalk from 'chalk'
 import { Bits, Bit } from './bits'
 import { initLogger } from './logger'
+import rand from 'random'
 
 const byteSize = 5
 const logger = initLogger(byteSize)
 
 const registers: { [key: string]: Bits } = {
-  "R5": new Bits("10001", byteSize),
-  "R6": new Bits("01110", byteSize),
-  "R7": new Bits(5, byteSize),
+  "R0": new Bits(rand.int(1, Bit.max(byteSize)), byteSize),
+  "R1": new Bits(rand.int(1, Bit.max(byteSize)), byteSize),
 }
 
 // Helper
