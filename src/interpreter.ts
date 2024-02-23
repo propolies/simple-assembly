@@ -108,7 +108,7 @@ fs.readFile("main.txt", (_, txt) => {
   const lines = code.split("\r\n")
   loop: for (const [i, line] of lines.entries()) {
     const [op, ...regs] = line.split(" ")
-    if (op[0] == "#") return
+    if (op[0] == "#") continue
     try { switch (op) {
       // Helper
       case "ZER": ZER(regs); break
