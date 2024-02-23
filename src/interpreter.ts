@@ -34,8 +34,8 @@ function SHR([reg, off]: string[]) {
   const computed = registers[reg] = Bit.shr(prev, parseInt(off))
   logger({ op: "SHL", reg, prev, computed})
 }
-function DEF([reg, value]: string[]) {
-  const computed = registers[reg] = new Bits(value, byteSize)
+function DEF([reg, value, type]: string[]) {
+  const computed = registers[reg] = new Bits(type == "int" ? parseInt(value) : value, byteSize)
   logger({ op: "DEF", reg, computed})
 }
 function INT([reg]: string[]) {
@@ -106,10 +106,10 @@ function DEC([reg]: string[]) {
 fs.readFile("main.txt", (_, txt) => {
   const code = txt.toString()
   const lines = code.split("\r\n")
-  lines.forEach((line, i) => {
+  loop: for (const [i, line] of lines.entries()) {
     const [op, ...regs] = line.split(" ")
-    switch (op) {
-
+    if (op[0] == "#") return
+    try { switch (op) {
       // Helper
       case "ZER": ZER(regs); break
       case "MOV": MOV(regs); break
@@ -137,6 +137,9 @@ fs.readFile("main.txt", (_, txt) => {
         } else {
           console.log("")
         }
+    }} catch(e) { 
+      console.log(chalk.red(`Error at line: ${i}`))
+      break loop;
     }
-  })
+  }
 })
