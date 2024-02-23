@@ -123,7 +123,7 @@ fs.readFile("main.txt", (_, txt) => {
       case "NOT": NOT(regs); break
       case "AND": AND(regs); break
       case "XOR": XOR(regs); break
-      case "OR ":  OR(regs); break
+      case "OR": OR(regs); break
 
       // Math
       case "ADD": ADD(regs); break
