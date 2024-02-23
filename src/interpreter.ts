@@ -45,7 +45,7 @@ function INT([reg]: string[]) {
 function CUR(_: string[]) {
   console.log(chalk.blue("CUR"))
   Object.entries(registers).forEach(([ reg, bits ]) => {
-    console.log("   ", reg, bits.toString())
+    console.log("   ", reg, bits.toString(), chalk.green(bits.toInt()))
   })
 }
 
