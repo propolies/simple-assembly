@@ -28,6 +28,11 @@ export class Bits {
       .map((s) => parseInt(s))
   }
 
+  toInt() {
+    const [ flag, ...num ] = this.bits
+    return parseInt(num.join(""), 2) - (flag * (Bit.max(this.length) + 1))
+  }
+
   toString() {
     return this.bits.join("")
   }

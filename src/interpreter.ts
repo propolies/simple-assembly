@@ -38,6 +38,10 @@ function DEF([reg, value]: string[]) {
   const computed = registers[reg] = new Bits(value, byteSize)
   logger({ op: "DEF", reg, computed})
 }
+function INT([reg]: string[]) {
+  const computed = registers[reg].toInt().toString()
+  logger({ op: "INT", reg, computed})
+}
 function CUR(_: string[]) {
   console.log(chalk.blue("CUR"))
   Object.entries(registers).forEach(([ reg, bits ]) => {
@@ -113,6 +117,7 @@ fs.readFile("main.txt", (_, txt) => {
       case "SHR": SHR(regs); break
       case "CUR": CUR(regs); break
       case "DEF": DEF(regs); break
+      case "INT": INT(regs); break
 
       // Logic
       case "NOT": NOT(regs); break

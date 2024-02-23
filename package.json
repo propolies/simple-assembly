@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "nodemon --exec tsx interpreter.ts -e ts,txt"
+    "dev": "nodemon --exec tsx ./src/interpreter.ts -e ts,txt"
   },
   "dependencies": {
     "chalk": "^5.3.0"
