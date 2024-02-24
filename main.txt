@@ -1,4 +1,8 @@
+DEF R0 10001
+DEF R1 8 int
+
 INT R0
-INT R1
+ADD R0 R0 R1
+ORR R0 R0 R1 # comment
 
 CUR

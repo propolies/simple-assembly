@@ -18,7 +18,7 @@ type LoggerArgs = {
 export const initLogger = (byteSize: number) => ({ op = "", reg = "", prev = "", computed = "", sym = "="}: LoggerArgs) => {
   console.log(
     chalk.blue(calcSpace(op, 3)),
-    calcSpace(reg, 2),
+    calcSpace(reg, 3),
     chalk.red(calcSpace(prev, byteSize)),
     calcSpace(sym, 1),
     chalk.green(calcSpace(computed, byteSize))

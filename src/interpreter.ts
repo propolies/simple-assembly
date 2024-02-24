@@ -10,6 +10,11 @@ const logger = initLogger(byteSize)
 const registers: { [key: string]: Bits } = {
   "R0": new Bits(rand.int(1, Bit.max(byteSize)), byteSize),
   "R1": new Bits(rand.int(1, Bit.max(byteSize)), byteSize),
+  "Z": new Bits(0, byteSize),
+}
+
+function setZFlag(computed: Bits) {
+  registers["Z"] = new Bits(computed.toInt() == 0 ? 1 : 0, byteSize)
 }
 
 // Helper
@@ -22,7 +27,7 @@ function MOV([reg, r1]: string[]) {
   const prev = registers[reg]
   const v1 = registers[r1]
   const computed = registers[reg] = v1
-  logger({ reg: "MOV", prev, computed })
+  logger({ op: "MOV", prev, computed })
 }
 function SHL([reg, offset]: string[]) {
   const prev = registers[reg]
@@ -53,26 +58,30 @@ function CUR(_: string[]) {
 function NOT([reg]: string[]) {
   const prev = registers[reg]
   const computed = registers[reg] = Bit.not(prev)
+  setZFlag(computed)
   logger({ op: "NOT", reg, prev, computed })
 }
 function AND([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
   const computed = registers[reg] = Bit.and(v1, v2)
+  setZFlag(computed)
   logger({ op: "AND", reg, prev: v1, sym: "&" })
   logger({ prev: v2, computed, sym: "=" })
 }
-function OR([reg, r1, r2]: string[]) {
+function ORR([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
   const computed = registers[reg] = Bit.or(v1, v2)
-  logger({ op: "OR ", reg, prev: v1, sym: "|" })
+  setZFlag(computed)
+  logger({ op: "ORR", reg, prev: v1, sym: "|" })
   logger({ prev: v2, computed, sym: "=" })
 }
 function XOR([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
   const computed = registers[reg] = Bit.xor(v1, v2)
+  setZFlag(computed)
   logger({ op: "XOR", reg, prev: v1, sym: "^" })
   logger({ prev: v2, computed, sym: "=" })
 }
@@ -87,6 +96,7 @@ function ADD([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
   const computed = registers[reg] = Bit.add(v1, v2)
+  setZFlag(computed)
   logger({ op: "ADD", reg, prev: v1, sym: "+" })
   logger({ prev: v2, computed, sym: "=" })
 }
@@ -94,12 +104,14 @@ function SUB([reg, r1, r2]: string[]) {
   const v1 = registers[r1]
   const v2 = registers[r2]
   const computed = registers[reg] = Bit.sub(v1, v2)
+  setZFlag(computed)
   logger({ op: "SUB", reg, prev: v1, sym: "-" })
   logger({ prev: v2, computed, sym: "=" })
 }
 function DEC([reg]: string[]) {
   const prev = registers[reg]
   const computed = registers[reg] = Bit.dec(prev)
+  setZFlag(computed)
   logger({ op: "DEC", reg, prev, computed })
 }
 
@@ -109,7 +121,7 @@ fs.readFile("main.txt", (_, txt) => {
   loop: for (const [i, line] of lines.entries()) {
     const [op, ...regs] = line.split(" ")
     if (op[0] == "#") continue
-    try { switch (op) {
+    switch (op) {
       // Helper
       case "ZER": ZER(regs); break
       case "MOV": MOV(regs); break
@@ -123,7 +135,7 @@ fs.readFile("main.txt", (_, txt) => {
       case "NOT": NOT(regs); break
       case "AND": AND(regs); break
       case "XOR": XOR(regs); break
-      case "OR": OR(regs); break
+      case "ORR": ORR(regs); break
 
       // Math
       case "ADD": ADD(regs); break
@@ -137,9 +149,6 @@ fs.readFile("main.txt", (_, txt) => {
         } else {
           console.log("")
         }
-    }} catch(e) { 
-      console.log(chalk.red(`Error at line: ${i}`))
-      break loop;
     }
   }
 })
